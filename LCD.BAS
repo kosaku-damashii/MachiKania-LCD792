@@ -4,21 +4,6 @@ USEVAR LCD
 LCD=NEW(LCD792)
 LCD.INIT()
 
-REM I2CWRITE $3E,0,$40+8:WAIT 1
-REM I2CWRITE $3E,$40,$15,$0A,$15,$0A,$15,$0A,$15,$0A:WAIT 1
-
-REM A=PEEK32(SYSTEM(103)+8*(16*2+15))
-REM PRINT HEX$(A,4)
-REM A=PEEK32(SYSTEM(103)+8*(16*2+15)+4)
-REM PRINT HEX$(A,4)
-REM A=PEEK32(SYSTEM(103)+8*(16*2+15)+8)
-REM PRINT HEX$(A,4)
-REM A=PEEK32(SYSTEM(103)+8*(16*2+15)+12)
-REM PRINT HEX$(A,4)
-
-REM I2CWRITE $3E,0,$80+1:WAIT 1
-REM I2CWRITE $3E,$40,$01:WAIT 1
-
 FOR I=0 TO 15
   CLS
   PRINT "["+HEX$(I*16)+"~"+HEX$(I*16+15)+"]"
@@ -44,70 +29,66 @@ REM CLASS "LCD792"
 OPTION CLASSCODE
 
 METHOD INIT
- VAR C
- I2C 100:REM Set I2C Baudrate 100 KHz
- C=20   :REM Contrast:0~63
- REM Initialize AMQ0802
-REM I2CWRITE $3E,$00,$38:WAIT 1
-REM I2CWRITE $3E,$00,$39:WAIT 1
- I2CWRITE $3E,$00,$14:WAIT 1                    :REM Cursor or display shift
- I2CWRITE $3E,$00,$70 OR (C AND 15):WAIT 1      :REM Contrast
- I2CWRITE $3E,$00,$5C OR (C >> 4 AND 3):WAIT 1  :REM Contrast
-REM I2CWRITE $3E,$00,$6C:WAIT 15
- I2CWRITE $3E,$00,$38:WAIT 1                    :REM Function set (2 line)
- I2CWRITE $3E,$00,$01:WAIT 1                    :REM Clear display
- I2CWRITE $3E,$00,$0C:WAIT 1                    :REM Diplay ON/OFF control
+  VAR C
+  I2C 100:REM Set I2C Baudrate 100 KHz
+  C=20   :REM Contrast:0~63
+  REM Initialize AMQ0802
+  I2CWRITE $3E,$00,$14:WAIT 1                    :REM Cursor or display shift
+  I2CWRITE $3E,$00,$70 OR (C AND 15):WAIT 1      :REM Contrast
+  I2CWRITE $3E,$00,$5C OR (C >> 4 AND 3):WAIT 1  :REM Contrast
+  I2CWRITE $3E,$00,$38:WAIT 1                    :REM Function set (2 line)
+  I2CWRITE $3E,$00,$01:WAIT 1                    :REM Clear display
+  I2CWRITE $3E,$00,$0C:WAIT 1                    :REM Diplay ON/OFF control
 RETURN
 
 METHOD PRT
- REM Print String in line n
- VAR S,C,D,A,I,G,N
- I2CWRITE $3E,0,$80+((ARGS(1) AND 1)<<6):WAIT 1
- G=0
- N=0
+  REM Print String in line n
+  VAR S,C,D,A,I,G,N
+  I2CWRITE $3E,0,$80+((ARGS(1) AND 1)<<6):WAIT 1
+  G=0
+  N=0
 
- S=ARGS(2)
- WHILE PEEK(S)
-  C=PEEK(S)
+  S=ARGS(2)
+  WHILE PEEK(S)
+    C=PEEK(S)
 
-  IF ((C >= $20) AND (C <= $7D)) OR ((C >= $A0) AND (C <= $DF)) THEN
- REM   I2CWRITE $3E,0,$80+((ARGS(1) AND 1)<<6)+S:WAIT 1
-    I2CWRITE $3E,$40,C:WAIT 1
-  ELSE
-    D=SYSTEM(103)+8*(16*(C/16)+(C%16))
+    IF ((C >= $20) AND (C <= $7D)) OR ((C >= $A0) AND (C <= $DF)) THEN
+      I2CWRITE $3E,$40,C:WAIT 1
+    ELSE
+      D=SYSTEM(103)+8*(16*(C/16)+(C%16))
 
-REM    I2CWRITE $3E,0,$40:WAIT 1
-REM    I2CWRITE $3E,$40,$15,$0A,$15,$0A,$15,$0A,$15,$0A:WAIT 1
-    I2CWRITE $3E,0,$40+(8*G):WAIT 1
-    FOR I=0 TO 7
-     A=PEEK(D) >> 2
-     I2CWRITE $3E,$40,A:WAIT 1
-     D=D+1
-     PRINT HEX$(A,1);
-    NEXT
-    PRINT ""
-    I2CWRITE $3E,0,$80+$40+N:WAIT 1
-    I2CWRITE $3E,$40,G:WAIT 1
-    G=G+1
-    IF G>=8 THEN G=0
-  ENDIF
-  N=N+1
-  S=S+1
- WEND
+REM     I2CWRITE $3E,0,$40:WAIT 1
+REM     I2CWRITE $3E,$40,$15,$0A,$15,$0A,$15,$0A,$15,$0A:WAIT 1
+       I2CWRITE $3E,0,$40+(8*G):WAIT 1
+      FOR I=0 TO 7
+        A=PEEK(D) >> 2
+        I2CWRITE $3E,$40,A:WAIT 1
+        D=D+1
+        PRINT HEX$(A,1);
+      NEXT
+      PRINT ""
+      I2CWRITE $3E,0,$80+$40+N:WAIT 1
+      I2CWRITE $3E,$40,G:WAIT 1
+      G=G+1
+      IF G>=8 THEN G=0
+    ENDIF
+    N=N+1
+    S=S+1
+  WEND
 RETURN
 
 METHOD GENCHR
- REM Charactoer generator
- VAR C,S
- C=ARGS(1)
- I2CWRITE $3E,0,$40:WAIT 1
- S=SYSTEM(103)+8*(16*(C/16)+(C%16))
- FOR I=0 TO 7
-  A=PEEK(S) >> 2
-  I2CWRITE $3E,$40+(8*ARGS(2)),A:WAIT 1
-  PRINT HEX$(A,1)
-  S=S+1
- NEXT
+  REM Charactoer generator
+  VAR C,S
+  C=ARGS(1)
+  I2CWRITE $3E,0,$40:WAIT 1
+  S=SYSTEM(103)+8*(16*(C/16)+(C%16))
+  FOR I=0 TO 7
+    A=PEEK(S) >> 2
+    I2CWRITE $3E,$40+(8*ARGS(2)),A:WAIT 1
+    PRINT HEX$(A,1)
+    S=S+1
+  NEXT
 RETURN
 
 METHOD CLR
