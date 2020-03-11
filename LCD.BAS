@@ -71,20 +71,23 @@ REM  I2CWRITE $3E,0,$80+((ARGS(1) AND 1)<<6):WAIT 1
   C=PEEK(S)
 
   IF ((C >= $20) AND (C <= $7D)) OR ((C >= $90) AND (C <= $DF)) THEN
-    I2CWRITE $3E,0,$80+((ARGS(1) AND 1)<<6)+G:WAIT 1
+    I2CWRITE $3E,0,$80+((ARGS(1) AND 1)<<6)+S:WAIT 1
     I2CWRITE $3E,$40,C:WAIT 1
   ELSE
     I2CWRITE $3E,0,$40:WAIT 1
     D=SYSTEM(103)+8*(16*(C/16)+(C%16))
-    FOR I=0 TO 7
-     A=PEEK(D) >> 2
-     I2CWRITE $3E,$40+(8*G),A:WAIT 1
-     PRINT HEX$(A,1)
-    NEXT
-    I2CWRITE $3E,0,$80+(1 << 6)+G:WAIT 1
+
+    I2CWRITE $3E,$40,$15,$0A,$15,$0A,$15,$0A,$15,$0A:WAIT 1
+
+REM    FOR I=0 TO 7
+REM     A=PEEK(D) >> 2
+REM     I2CWRITE $3E,$40+(8*G),A:WAIT 1
+REM     PRINT HEX$(A,1)
+REM    NEXT
+    I2CWRITE $3E,0,$80+(1 << 6)+S:WAIT 1
     I2CWRITE $3E,$40,G:WAIT 1
+    G=G+1
   ENDIF
-  G=G+1
   S=S+1
  WEND
 RETURN
