@@ -62,29 +62,29 @@ RETURN
 
 METHOD PRT
  REM Print String in line n
- VAR S,C,D,A,I
- I2CWRITE $3E,0,$80+((ARGS(1) AND 1)<<6):WAIT 1
- I=0
+ VAR S,C,D,A,I,G
+REM  I2CWRITE $3E,0,$80+((ARGS(1) AND 1)<<6):WAIT 1
+ G=0
 
  S=ARGS(2)
  WHILE PEEK(S)
   C=PEEK(S)
 
   IF ((C >= $20) AND (C <= $7D)) OR ((C >= $90) AND (C <= $DF)) THEN
-    I2CWRITE $3E,0,$80+((ARGS(1) AND 1)<<6)+I:WAIT 1
+    I2CWRITE $3E,0,$80+((ARGS(1) AND 1)<<6)+G:WAIT 1
     I2CWRITE $3E,$40,C:WAIT 1
   ELSE
     I2CWRITE $3E,0,$40:WAIT 1
     D=SYSTEM(103)+8*(16*(C/16)+(C%16))
     FOR I=0 TO 7
      A=PEEK(D) >> 2
-     I2CWRITE $3E,$40+(8*0),A:WAIT 1
-     REM PRINT HEX$(A,1)
+     I2CWRITE $3E,$40+(8*G),A:WAIT 1
+     PRINT HEX$(A,1)
     NEXT
-    I2CWRITE $3E,0,$80+(1 << 6)+I:WAIT 1
-    I2CWRITE $3E,$40,I:WAIT 1
+    I2CWRITE $3E,0,$80+(1 << 6)+G:WAIT 1
+    I2CWRITE $3E,$40,G:WAIT 1
   ENDIF
-  I=I+1
+  G=G+1
   S=S+1
  WEND
 RETURN
