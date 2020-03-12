@@ -34,13 +34,13 @@ METHOD INILCD
  REM Initialize AMQ0802
 REM I2CWRITE $3E,$00,$38:WAIT 1
 REM I2CWRITE $3E,$00,$39:WAIT 1
- I2CWRITE $3E,$00,$14:WAIT 1
+ I2CWRITE $3E,$00,$14:WAIT 1                    :REM Cursor or display shift
  I2CWRITE $3E,$00,$70 OR (C AND 15):WAIT 1      :REM Contrast
  I2CWRITE $3E,$00,$5C OR (C >> 4 AND 3):WAIT 1  :REM Contrast
- I2CWRITE $3E,$00,$6C:WAIT 15
+REM I2CWRITE $3E,$00,$6C:WAIT 15
  I2CWRITE $3E,$00,$38:WAIT 1                    :REM 2 line
- I2CWRITE $3E,$00,$01:WAIT 1
- I2CWRITE $3E,$00,$0C:WAIT 1
+ I2CWRITE $3E,$00,$01:WAIT 1                    :REM Clear display
+ I2CWRITE $3E,$00,$0C:WAIT 1                    :REM Diplay ON/OFF control
 RETURN
 
 METHOD PRTLCD
