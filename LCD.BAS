@@ -37,9 +37,9 @@ METHOD INIT
   I2CWRITE $3E,$00,$14:WAIT 1                    :REM Cursor or display shift
   I2CWRITE $3E,$00,$70 OR (C AND 15):WAIT 1      :REM Contrast
   I2CWRITE $3E,$00,$5C OR (C >> 4 AND 3):WAIT 1  :REM Contrast
-  I2CWRITE $3E,$00,$38:WAIT 1                    :REM Function set (2 line)
-  I2CWRITE $3E,$00,$01:WAIT 1                    :REM Clear display
-  I2CWRITE $3E,$00,$0C:WAIT 1                    :REM Diplay ON/OFF control
+  GOSUB _LINE,1
+  GOSUB _CLR
+  GOSUB _DCTRL,1,0,0
 RETURN
 
 METHOD PRT
@@ -77,6 +77,37 @@ METHOD PRT
   WEND
 RETURN
 
+REM --- Function set
+
+METHOD LINE
+  GOSUB _LINE,ARGS(1)
+RETURN
+
+LABEL _LINE
+  N=ARGS(1) AND 1   :REM N=0:One-line, N=1:Two-line
+  I2CWRITE $3E,$00,$30+(N<<3):WAIT 1
+RETURN
+
+
+REM --- Clear display
+
 METHOD CLR
+  GOSUB _CLR
+RETURN
+
+LABEL _CLR
   I2CWRITE $3E,$00,$01:WAIT 1
+RETURN
+
+REM --- Diplay ON/OFF control
+
+METHOD DCTRL
+  GOSUB _DCTRL, ARGS(1), ARGS(2), ARGS(3)
+RETURN
+
+LABEL _DCTRL
+  D=ARGS(1) AND 1   :REM 1:Display on, 0:Display off
+  C=ARGS(2) AND 1   :REM 1:Cursor on, 0:Cursor off
+  B=ARGS(3) AND 1   :rem 1:Blink on, 0:Blink off
+  I2CWRITE $3E,$00,$08 AND (D<<2) AND (C<<1) AND B:WAIT 1
 RETURN
