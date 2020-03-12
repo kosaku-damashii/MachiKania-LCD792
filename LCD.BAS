@@ -1,3 +1,4 @@
+WIDTH 32
 USECLASS LCD792
 USEVAR LCD
 
@@ -51,44 +52,29 @@ METHOD PRT
   S=ARGS(2)
   WHILE PEEK(S)
     C=PEEK(S)
-
     IF ((C >= $20) AND (C <= $7D)) OR ((C >= $A0) AND (C <= $DF)) THEN
       I2CWRITE $3E,$40,C:WAIT 1
     ELSE
       D=SYSTEM(103)+8*(16*(C/16)+(C%16))
-
-REM     I2CWRITE $3E,0,$40:WAIT 1
-REM     I2CWRITE $3E,$40,$15,$0A,$15,$0A,$15,$0A,$15,$0A:WAIT 1
-       I2CWRITE $3E,0,$40+(8*G):WAIT 1
-      FOR I=0 TO 7
-        A=PEEK(D) >> 2
-        I2CWRITE $3E,$40,A:WAIT 1
-        D=D+1
-        PRINT HEX$(A,1);
-      NEXT
-      PRINT ""
-      I2CWRITE $3E,0,$80+$40+N:WAIT 1
-      I2CWRITE $3E,$40,G:WAIT 1
-      G=G+1
+      I2CWRITE $3E,0,$40+(8*G):WAIT 1
+      IF PEEK32(D) OR PEEK32(D+4) THEN
+          FOR I=0 TO 7
+          A=PEEK(D) >> 2
+          I2CWRITE $3E,$40,A:WAIT 1
+          D=D+1
+        NEXT
+        I2CWRITE $3E,0,$80+$40+N:WAIT 1
+        I2CWRITE $3E,$40,G:WAIT 1
+        G=G+1
+      ELSE
+        I2CWRITE $3E,0,$80+$40+N:WAIT 1
+        I2CWRITE $3E,$40,$20:WAIT 1
+      ENDIF
       IF G>=8 THEN G=0
     ENDIF
     N=N+1
     S=S+1
   WEND
-RETURN
-
-METHOD GENCHR
-  REM Charactoer generator
-  VAR C,S
-  C=ARGS(1)
-  I2CWRITE $3E,0,$40:WAIT 1
-  S=SYSTEM(103)+8*(16*(C/16)+(C%16))
-  FOR I=0 TO 7
-    A=PEEK(S) >> 2
-    I2CWRITE $3E,$40+(8*ARGS(2)),A:WAIT 1
-    PRINT HEX$(A,1)
-    S=S+1
-  NEXT
 RETURN
 
 METHOD CLR
