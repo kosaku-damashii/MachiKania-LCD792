@@ -1,4 +1,4 @@
-WIDTH 32
+WIDTH 40
 USECLASS LCD792
 USEVAR LCD
 
@@ -55,11 +55,11 @@ METHOD PRT
     IF ((C >= $20) AND (C <= $7D)) OR ((C >= $A0) AND (C <= $DF)) THEN
       I2CWRITE $3E,$40,C:WAIT 1
     ELSE
-      D=SYSTEM(103)+8*(16*(C/16)+(C%16))
+      D=SYSTEM(103)+2048+8*(16*(C/16)+(C%16))    :REM 6x8 dot font
       I2CWRITE $3E,0,$40+(8*G):WAIT 1
       IF PEEK32(D) OR PEEK32(D+4) THEN
-          FOR I=0 TO 7
-          A=PEEK(D) >> 2
+        FOR I=0 TO 7
+          A=PEEK(D) >> 3
           I2CWRITE $3E,$40,A:WAIT 1
           D=D+1
         NEXT
