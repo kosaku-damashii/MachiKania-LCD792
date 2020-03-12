@@ -30,16 +30,16 @@ REM === CLASS "LCD792" ====
 OPTION CLASSCODE
 
 METHOD INIT
-  I2C 100            :REM Set I2C Baudrate 100 KHz
-  GOSUB _SHIFT,0,1   :REM Shift cursor to the right
-  GOSUB _CTRST,20    :REM Contrast:0~63
-  GOSUB _LINE,1      :REM 2 lines
-  GOSUB _CLR
-  GOSUB _DCTRL,1,0,0
+  I2C 100   :REM Set I2C Baudrate 100 KHz
+  M=ARGS(-2)
+  CALL M.SHIFT(0,1)   :REM Shift cursor to the right
+  CALL M.CTRST(10)    :REM Contrast:0~63
+  CALL M.CLINE(1)     :REM 2 lines
+  CALL M.CLR()        :REM Cleasr display
+  CALL M.DCTRL(1,0,0) :REM Disp:ON,Cursor:OFF,Blink:OFF
 RETURN
 
 REM --- Print String in line n
-
 METHOD PRT
   VAR S,C,D,A,I,G,N
 
@@ -77,12 +77,7 @@ METHOD PRT
 RETURN
 
 REM --- Cursor or display shift
-
 METHOD SHIFT
-  GOSUB _SHIFT,ARGS(1),ARGS(2)
-RETURN
-
-LABEL _SHIFT
   USEVAR S_C,R_L
   VAR S_C,R_L
   S_C=ARGS(1) AND 1
@@ -91,12 +86,7 @@ LABEL _SHIFT
 RETURN
 
 REM --- Function set
-
-METHOD LINE
-  GOSUB _LINE,ARGS(1)
-RETURN
-
-LABEL _LINE
+METHOD CLINE
   VAR N
   N=ARGS(1) AND 1   :REM N=0:One-line, N=1:Two-line
   I2CWRITE $3E,$00,$30+(N<<3):WAIT 1
@@ -104,37 +94,21 @@ RETURN
 
 
 REM --- Clear display
-
 METHOD CLR
-  GOSUB _CLR
-RETURN
-
-LABEL _CLR
   I2CWRITE $3E,$00,$01:WAIT 1
 RETURN
 
 REM --- Diplay ON/OFF control
-
 METHOD DCTRL
-  GOSUB _DCTRL,ARGS(1),ARGS(2),ARGS(3)
-RETURN
-
-LABEL _DCTRL
   VAR D,C,B
   D=ARGS(1) AND 1   :REM 1:Display on, 0:Display off
   C=ARGS(2) AND 1   :REM 1:Cursor on, 0:Cursor off
   B=ARGS(3) AND 1   :rem 1:Blink on, 0:Blink off
-  I2CWRITE $3E,$00,$08+(D<<2)+(C<<1) AND B:WAIT 1
+  I2CWRITE $3E,$00,$08+(D<<2)+(C<<1)+B:WAIT 1
 RETURN
 
 REM --- Contrast
-
 METHOD CTRST
-RETURN
-  GOSUB _CTRST,ARGS(1)
-RETURN
-
-LABEL _CTRST
   VAR C
   C=ARGS(1)
   I2CWRITE $3E,$00,$70 OR (C AND $0F):WAIT 1
