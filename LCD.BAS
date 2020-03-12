@@ -70,7 +70,7 @@ METHOD PRT
  WHILE PEEK(S)
   C=PEEK(S)
 
-  IF ((C >= $20) AND (C <= $7D)) OR ((C >= $90) AND (C <= $DF)) THEN
+  IF ((C >= $20) AND (C <= $7D)) OR ((C >= $A0) AND (C <= $DF)) THEN
  REM   I2CWRITE $3E,0,$80+((ARGS(1) AND 1)<<6)+S:WAIT 1
     I2CWRITE $3E,$40,C:WAIT 1
   ELSE
@@ -78,39 +78,22 @@ METHOD PRT
 
 REM    I2CWRITE $3E,0,$40:WAIT 1
 REM    I2CWRITE $3E,$40,$15,$0A,$15,$0A,$15,$0A,$15,$0A:WAIT 1
+    I2CWRITE $3E,0,$40+(8*G):WAIT 1
     FOR I=0 TO 7
      A=PEEK(D) >> 2
-     I2CWRITE $3E,$40+(8*G):WAIT 1
      I2CWRITE $3E,$40,A:WAIT 1
-     PRINT HEX$(A,1)
+     D=D+1
+     PRINT HEX$(A,1);
     NEXT
+    PRINT ""
     I2CWRITE $3E,0,$80+$40+N:WAIT 1
     I2CWRITE $3E,$40,G:WAIT 1
-    PRINT N
     G=G+1
     IF G>=8 THEN G=0
   ENDIF
   N=N+1
   S=S+1
  WEND
-RETURN
-
- S=ARGS(2)
- WHILE PEEK(S)
-  C=PEEK(S)
-
-  I2CWRITE $3E,0,$40:WAIT 1
-  D=SYSTEM(103)+8*(16*(C/16)+(C%16))
-  FOR I=0 TO 7
-   A=PEEK(D) >> 2
-   I2CWRITE $3E,$40+(8*0),A:WAIT 1
-   PRINT HEX$(A,1)
-  NEXT
-
-
-  S=S+1
- WEND
-
 RETURN
 
 METHOD GENCHR
